@@ -1,0 +1,6 @@
+first执行亮点配置更新
+1.车型库同步到云（完成后处理汽车之家车型库到IT）
+2.使用同步后的云车300处理得到Vdatabase
+3.使用云vdatabase处理得到analysis_che300_cofig_info和config_reg_series_rule
+4.执行车型库ID匹配
+5.1

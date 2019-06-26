@@ -1,0 +1,10 @@
+#local
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main_local/hl_config_che300/hl_config_che300.R',sep=""),echo=TRUE,encoding="utf-8")
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main_local/main_carbase/main_carbase.R',sep=""),echo=TRUE,encoding="utf-8")
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main_local/yck_autohome/yck_autohome_match.R',sep=""),echo=TRUE,encoding="utf-8")
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main_local/wash_platform/wash_platform.R',sep=""),echo=TRUE,encoding="utf-8")
+##Ali_yun
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main/config_vdabase/config_vdatabase_yck_major_info.R',sep=""),echo=TRUE,encoding="utf-8")
+source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main/config_plat_id_match/main_plat_id.R',sep=""),echo=TRUE,encoding="utf-8")
+#source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main/config_series_match/config_series_id.R',sep=""),echo=TRUE,encoding="utf-8")
+#source(paste0(gsub("\\/bat","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()})),'/main/config_series_match/czw12365.R',sep=""),echo=TRUE,encoding="utf-8")
