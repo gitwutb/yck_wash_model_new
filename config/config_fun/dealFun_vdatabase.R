@@ -23,7 +23,7 @@ dealFun_brandseries<-function(input_cxk){
   linshi_series<-c(str_c(rm_series_rule$rule_series,sep="",collapse = "|"))
   series_name<-str_extract(input_test1$model_name,gsub(" ","",linshi_series))
   series_name[which(is.na(series_name))]<-""
-  linshi<-str_extract(input_test1$model_name,"A佳|N3佳|-进口")
+  linshi<-str_extract(input_test1$model_name,"A佳|N3佳|-进口|进口")
   linshi[which(is.na(linshi))]<-""
   series_name<-paste(series_name,linshi,sep = "")
   #-重新将新的brand及series替换-#
@@ -82,7 +82,7 @@ dealFun_brandseries<-function(input_cxk){
     dplyr::select(car_id,brand_name=name,series_name=series,model_name=model_name_t,model_price,model_year,qx_series_all,auto=car_auto,liter,discharge_standard)
   return_data_input$model_name<-toupper(return_data_input$model_name)
   return_data_input$auto<-gsub("-／","",return_data_input$auto)
-  linshi<-str_extract(return_data_input$model_name,"进口")
+  linshi<-str_extract(paste0(return_data_input$series_name,return_data_input$model_name),"进口")
   linshi[which(is.na(linshi))]<-""
   linshi<-gsub("进口","-进口",linshi)
   return_data_input$series_name<-paste(return_data_input$series_name,linshi,sep = "")
@@ -151,6 +151,9 @@ fun_stopWords<-function(data_input){
   qx_name<-gsub("\\）",")",qx_name)
   qx_name<-gsub("\\(进口\\)","",qx_name)
   qx_name<-gsub("\\(海外\\)","",qx_name)
+  qx_name<-gsub("欧尚COS1°\\(科赛1°\\)|欧尚COS1°|欧尚科赛1°","欧尚科赛",qx_name)
+  qx_name<-gsub("欧尚COSMOS\\(科尚\\)|欧尚COSMOS","欧尚科尚",qx_name)
+  qx_name<-gsub("欧尚EV A600 EV|欧尚EVA600EV|欧尚EV A600|欧尚EV","欧尚A600EV",qx_name)
   qx_name<-gsub("POWER DAILY","宝迪",qx_name)
   qx_name<-gsub("III","Ⅲ",qx_name)
   qx_name<-gsub("II","Ⅱ",qx_name)
@@ -584,6 +587,9 @@ fun_normalization<-function(input_test) {
   input_test<-gsub("\\·|\\?","",input_test)
   input_test<-gsub("\\(进口\\)|\\(海外\\)","-进口",input_test)
   input_test<-gsub("北京汽车|北京","北汽",input_test)
+  input_test<-gsub("欧尚COS1°\\(科赛1°\\)|欧尚COS1°|欧尚科赛1°","欧尚科赛",input_test)
+  input_test<-gsub("欧尚COSMOS\\(科尚\\)|欧尚COSMOS","欧尚科尚",input_test)
+  input_test<-gsub("欧尚EVA600EV|欧尚EVA600|欧尚EV","欧尚A600EV",input_test)
   input_test<-gsub("北汽20","BJ20",input_test)
   input_test<-gsub("北汽40","BJ40",input_test)
   input_test<-gsub("北汽80","BJ80",input_test)

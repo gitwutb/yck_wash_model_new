@@ -47,6 +47,10 @@ fun_vdata_sync_detail_c300<-function(min_model_year){
 fun_vdata_sync_autohome<-function(input_ip,min_model_year){
   loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
   dbSendQuery(loc_channel,'SET NAMES gbk')
+  dbSendQuery(loc_channel,"UPDATE config_autohome_detail_info a,(SELECT b.model_id,c.color_outside,c.color_outside_code FROM config_autohome_major_info_tmp b
+          INNER JOIN config_autohome_color c ON b.series_id=c.series_id WHERE color_outside IS NOT NULL) b
+          SET a.color_outside=b.color_outside,a.color_outside_code=b.color_outside_code
+                          WHERE a.autohome_id=b.model_id AND a.color_outside='无'")
   output_save<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT a.model_id,a.brand_id brandid,a.brand_name,a.brand_letter Initial,
    a.series_group_name,a.series_id,a.series_name,a.model_year,a.model_name,a.model_price,a.status,b.engine liter,
    b.gear_box auto,b.environmental_standards_org discharge_standard,c.model_id is_green FROM config_autohome_major_info_tmp a

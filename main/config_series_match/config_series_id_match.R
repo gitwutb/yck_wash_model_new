@@ -8,7 +8,7 @@ library(raster)
 #读取数据
 library(RMySQL)
 local_file<-gsub("(\\/bat|\\/main).*","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()}))
-source(paste0(local_file,"\\config\\config_fun\\fun_mysql_config_up.R"),echo=FALSE,encoding="utf-8")
+source(paste0(local_file,"/config/config_fun/yck_base_function.R"),echo=FALSE,encoding="utf-8")
 local_defin_yun<-fun_mysql_config_up()$local_defin_yun
 source(paste0(local_file,"/config/config_fun/dealFun_vdatabase.R"),echo=FALSE,encoding="utf-8")
 

@@ -9,7 +9,7 @@ library(lubridate)
 library(parallel)
 library(rlist)
 local_file<-gsub("(\\/main|\\/bat|\\/main_local).*","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()}))
-source(paste0(local_file,"/config/config_fun/fun_mysql_config_up.R"),echo=FALSE,encoding="utf-8")
+source(paste0(local_file,"/config/config_fun/yck_base_function.R"),echo=FALSE,encoding="utf-8")
 local_defin<-fun_mysql_config_up()$local_defin
 #function
 fun_config_bright_sim<-function(model_id){

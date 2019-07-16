@@ -11,16 +11,23 @@ library(pinyin)
 local_file<<-gsub("(\\/main|\\/bat|\\/main_local).*","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()}))
 source(paste0(local_file,"/config/config_fun/yck_base_function.R"),echo=FALSE,encoding="utf-8")
 source(paste0(local_file,"/config/config_fun/dealFun_vdatabase.R"),echo=FALSE,encoding="utf-8")
-source(paste0(local_file,"/config/config_fun/fun_mysql_config_up.R"),echo=FALSE,encoding="utf-8")
 local_defin<<-fun_mysql_config_up()$local_defin
 local_defin111<<-fun_mysql_config_up()$local_defin111
 local_defin_yun<<-fun_mysql_config_up()$local_defin_yun
 source(paste0(local_file,"/main_local/main_carbase/fun_vdatabase_sync.R"),echo=FALSE,encoding="utf-8")
 source(paste0(local_file,"/main_local/main_carbase/fun_else_sync.R"),echo=FALSE,encoding="utf-8")
+loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
+dbSendQuery(loc_channel,'SET NAMES gbk')
+config_distr<<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT regional,b.province,a.key_municipal city FROM config_district a
+                                  INNER JOIN config_district_regional b ON a.key_province=b.province;"),-1)
+config_distr_all<<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT regional,b.province,a.key_municipal city,a.key_county FROM config_district a
+                                  INNER JOIN config_district_regional b ON a.key_province=b.province;"),-1)
+dbDisconnect(loc_channel)
+
 #每周四更新（22号之后的周四更新全量）
 if(as.integer(format(Sys.Date(),"%d"))>22){
   min_model_year=as.integer(format(Sys.Date(),"%Y"))-10}else{
-    min_model_year=as.integer(format(Sys.Date(),"%Y"))-2
+    min_model_year=as.integer(format(Sys.Date(),"%Y"))-3
   }
 if(weekdays(Sys.Date())=='星期四'){
   input_v<-c("fun_vdata_sync_autohome","fun_vdata_sync_czb","fun_vdata_sync_souhu","fun_vdata_sync_yiche",'fun_vdata_sync_youxin','fun_vdata_sync_che58')
