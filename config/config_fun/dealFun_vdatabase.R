@@ -144,7 +144,7 @@ fun_stopWords<-function(data_input){
   car_year<-gsub("款","",car_year)
   car_year[which(nchar(car_year)==2)]<-paste("20",car_year[which(nchar(car_year)==2)],sep = "")
   loc_year<-str_locate(qx_name,"[1-2][0-9][0-9][0-9]款|[0-9][0-9]款|2000")
-  qx_name<-str_sub(qx_name,loc_year[,2]+1)
+  if(length(is.na(loc_year[,1]))/nrow(loc_year)<0.02){qx_name<-str_sub(qx_name,loc_year[,2]+1)}
   qx_name<-gsub(c(str_c(1990:2030,"款 ",sep="",collapse='|')),"",qx_name)
   if(length(grep('20',data_input$model_year))!=0){car_year=data_input$model_year}
   qx_name<-gsub("\\（","(",qx_name)
@@ -199,7 +199,7 @@ fun_stopWords<-function(data_input){
   car_series1<-gsub("GRAND EDITION","特别版",car_series1)
   car_series1<-gsub("改装房车","",car_series1)
   qx_name[grep("奔驰",car_series1)]<-gsub("AMG","",qx_name[grep("奔驰",car_series1)])
-  benchi<-str_extract(car_series1,"荣威.*|福特(E|F).*|捷豹.*|奥迪TTS|奥迪TT|奥迪A8|奥迪S[1-9]|奔驰.*")
+  benchi<-str_extract(car_series1,"荣威.*|福特(E|F).*|捷豹.*|奥迪TTS|奥迪TT|奥迪A[1-9]L|奥迪A[1-9]|奥迪S[1-9]|奔驰.*")
   benchi<-gsub("荣威|福特E|福特|捷豹|奥迪|奔驰|(级| |-).*","",benchi)
   benchi[-grep("",benchi)]<-""
   #清除e L等
@@ -209,7 +209,7 @@ fun_stopWords<-function(data_input){
   qx_name<-unlist(lapply(1:length(car_series1),forFun))
   ##获取奔驰数字串
   linshi<-str_extract(car_series1,"奔驰.*")
-  linshi[grep("奔驰",car_series1)]<-str_extract(qx_name[grep("奔驰",car_series1)],"[0-9]{3}|[0-9]{2}")
+  linshi[grep("奔驰",car_series1)]<-str_extract(qx_name[grep("奔驰",car_series1)],"[0-9]{3}(L|)|[0-9]{2}(L|)")
   linshi[which(is.na(linshi))]<-""
   linshi[-grep("",linshi)]<-""
   benchi<-paste(benchi,linshi,sep = "")

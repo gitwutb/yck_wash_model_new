@@ -102,16 +102,20 @@ fun_config_vdatabase_info<-function(){
   dbSendQuery(loc_channel,'SET NAMES gbk')
   dbSendQuery(loc_channel,"REPLACE INTO config_vdatabase_yck_major_info SELECT a.yck_modelid,a.model_id,b.Initial,
                   b.brandid,c.yck_brandid,c.brand_name,d.series_group_name,b.series_id,d.yck_seriesid,d.series_name,
-                  b.model_name,b.model_price,b.model_year,b.auto,b.liter,b.discharge_standard,b.max_reg_year,
+                  b.model_name,b.short_name,b.model_price,b.model_year,b.auto,b.liter,b.discharge_standard,b.max_reg_year,
                   b.min_reg_year,d.car_level,b.seat_number,b.hl_configs,b.hl_configc,d.is_green,d.is_import
                 FROM config_vdatabase_yck_model a
                 INNER JOIN config_che300_major_info b ON a.model_id=b.model_id
                 INNER JOIN config_vdatabase_yck_brand c ON b.brandid=c.brandid
                 INNER JOIN config_vdatabase_yck_series d ON b.series_id=d.series_id
             WHERE d.is_green !='无' AND d.car_level!='无' AND b.auto in('手动','自动','电动')")
-  dbSendQuery(loc_channel,"UPDATE config_vdatabase_yck_major_info SET is_green=1 WHERE model_id in(1127679,1127680,1132874,
-    1132875,1132876,1132877,1132878,1134648,1134649,1143368,1143792,1145933,1145934,1145935,1145936,
-    1145937,1145938,1145939,1146014,1151333,15587,15600,28772,29125,29126,30213,31862,31863,32496,32742)")
+  dbSendQuery(loc_channel,"UPDATE config_vdatabase_yck_major_info SET is_green=2 WHERE model_id in 
+              (select model_id from config_che300_detail_info where eng_fuel_type REGEXP '增程式|插电式|油电')")
+  dbSendQuery(loc_channel,"UPDATE config_vdatabase_yck_major_info SET is_green=0 WHERE model_id in 
+              (select model_id from config_che300_detail_info where eng_fuel_type REGEXP '汽油')")
+  dbSendQuery(loc_channel,"UPDATE config_vdatabase_yck_major_info SET is_green=1 WHERE model_id in 
+              (select model_id from config_che300_detail_info where eng_fuel_type REGEXP '纯电动|电力')")
+  dbSendQuery(loc_channel,"UPDATE config_vdatabase_yck_major_info SET auto='自动' WHERE is_green=2 AND auto='电动'")
   dbDisconnect(loc_channel)
   return(1)
 }
@@ -119,7 +123,7 @@ fun_config_vdatabase_info<-function(){
 fun_analysis_che300_cofig<-function(){
   loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
   dbSendQuery(loc_channel,'SET NAMES gbk')
-  data_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT model_id,brand_name,series_group_name,series_name,model_name,
+  data_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT model_id,brand_name,series_group_name,series_name,short_name model_name,
         model_price,model_year,auto,liter,discharge_standard FROM config_vdatabase_yck_major_info;"),-1)
   dbDisconnect(loc_channel)
   

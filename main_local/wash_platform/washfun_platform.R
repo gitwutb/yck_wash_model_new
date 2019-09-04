@@ -49,6 +49,32 @@ washfun_UserCar_standard<-function(deal_data_input,input_tname){
     }
   }
 }
+#数据清理
+washfun_UserCar_deal<-function(input_widetab){
+  input_widetab$annual[which(is.na(input_widetab$annual))]<-''
+  input_widetab$transfer[which(is.na(input_widetab$transfer))]<-''
+  input_widetab$insure[which(is.na(input_widetab$insure))]<-''
+  input_widetab$state[which(is.na(input_widetab$state))]<-''
+  input_widetab$trans_fee[which(is.na(input_widetab$trans_fee))]<-''
+  input_widetab$transfer<-gsub('.*数据|NA','',input_widetab$transfer)
+  input_widetab$annual<-gsub('NA','',input_widetab$annual)
+  input_widetab$insure<-gsub('NA','',input_widetab$insure)
+  input_widetab$state<-gsub('NA','',input_widetab$state)
+  input_widetab$trans_fee<-gsub('NA','',input_widetab$trans_fee)
+  #清洗color
+  input_widetab$color<-gsub("――|-|无数据|null|[0-9]","",input_widetab$color)
+  input_widetab$color<-gsub("其他","其它",input_widetab$color)
+  input_widetab$color<-gsub("色","",input_widetab$color)
+  input_widetab$color<-gsub("浅|深|象牙|冰川","",input_widetab$color)
+  input_widetab<-data.frame(input_widetab,date_add=format(Sys.time(),'%Y-%m-%d'))
+  ##处理
+  input_widetab<-input_widetab%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
+  input_widetab<-input_widetab%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
+  input_widetab<-input_widetab%>%dplyr::filter(as.Date(as.character(regDate))>'2000-01-01'&!is.na(regDate))
+  input_widetab<-input_widetab%>%dplyr::filter(as.Date(as.character(regDate))<as.Date(as.character(date_add)))
+  return(input_widetab)
+}
+
 ##第二类：独有治理函数
 fun_step2_che168<-function(){
   loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
@@ -86,28 +112,7 @@ fun_step2_che168<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_che58<-function(){
@@ -161,28 +166,7 @@ fun_step2_che58<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-city)
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_csp<-function(){
@@ -230,28 +214,7 @@ fun_step2_csp<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_czb<-function(){
@@ -302,28 +265,7 @@ fun_step2_czb<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_guazi<-function(){
@@ -388,28 +330,7 @@ fun_step2_guazi<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_rrc<-function(){
@@ -452,28 +373,7 @@ fun_step2_rrc<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_yiche<-function(){
@@ -528,28 +428,7 @@ fun_step2_yiche<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_youxin<-function(){
@@ -595,28 +474,7 @@ fun_step2_youxin<-function(){
   ##分区字段(放最后)
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
-  
-  ###清洗为NA
-  wutb$annual[which(is.na(wutb$annual))]<-''
-  wutb$transfer[which(is.na(wutb$transfer))]<-''
-  wutb$insure[which(is.na(wutb$insure))]<-''
-  wutb$state[which(is.na(wutb$state))]<-''
-  wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-  wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-  wutb$annual<-gsub('NA','',wutb$annual)
-  wutb$insure<-gsub('NA','',wutb$insure)
-  wutb$state<-gsub('NA','',wutb$state)
-  wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-  #清洗color
-  wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-  wutb$color<-gsub("其他","其它",wutb$color)
-  wutb$color<-gsub("色","",wutb$color)
-  wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-  wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-  ##处理
-  wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-  wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-  wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+  wutb<-washfun_UserCar_deal(wutb)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 ##二手车价格平台处理函数
@@ -925,28 +783,7 @@ washfun_souche<-function(){
     ##分区字段(放最后)
     input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
     wutb<-input_orig %>% dplyr::select(-regional)
-    
-    ###清洗为NA
-    wutb$annual[which(is.na(wutb$annual))]<-''
-    wutb$transfer[which(is.na(wutb$transfer))]<-''
-    wutb$insure[which(is.na(wutb$insure))]<-''
-    wutb$state[which(is.na(wutb$state))]<-''
-    wutb$trans_fee[which(is.na(wutb$trans_fee))]<-''
-    wutb$transfer<-gsub('.*数据|NA','',wutb$transfer)
-    wutb$annual<-gsub('NA','',wutb$annual)
-    wutb$insure<-gsub('NA','',wutb$insure)
-    wutb$state<-gsub('NA','',wutb$state)
-    wutb$trans_fee<-gsub('NA','',wutb$trans_fee)
-    #清洗color
-    wutb$color<-gsub("――|-|无数据|null|[0-9]","",wutb$color)
-    wutb$color<-gsub("其他","其它",wutb$color)
-    wutb$color<-gsub("色","",wutb$color)
-    wutb$color<-gsub("浅|深|象牙|冰川","",wutb$color)
-    wutb<-data.frame(wutb,date_add=format(Sys.time(),'%Y-%m-%d'))
-    ##处理
-    wutb<-wutb%>%dplyr::filter(round(quotes/model_price,2)>0.05&round(quotes/model_price,2)<1.01)
-    wutb<-wutb%>%dplyr::filter(user_years<1|round(quotes/model_price,2)<1)
-    wutb<-wutb%>%dplyr::filter(as.character(regDate)>'2000-01-01'&!is.na(regDate))
+    wutb<-washfun_UserCar_deal(wutb)
     fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
   }
   
