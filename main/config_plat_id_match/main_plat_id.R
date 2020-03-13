@@ -15,13 +15,10 @@ source(paste0(local_file,"/config/config_fun/dealFun_vdatabase.R"),echo=FALSE,en
 source(paste0(local_file,"/config/config_fun/matchFun_vdatabase.R"),echo=TRUE,encoding="utf-8")
 local_defin_yun<-fun_mysql_config_up()$local_defin_yun
 rm_rule<<- read.csv(paste0(local_file,"/config/config_file/reg_rule.csv"),header = T,sep = ",")
-out_rrc<<- read.csv(paste0(local_file,"/config/config_file/out_rrc.csv"),header = T,sep = ",")
-loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-dbSendQuery(loc_channel,'SET NAMES gbk')
-rm_series_rule<<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM config_reg_series_rule;"),-1)
-che300<<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM analysis_che300_cofig_info;"),-1)
+#out_rrc<<- read.csv(paste0(local_file,"/config/config_file/out_rrc.csv"),header = T,sep = ",")
+rm_series_rule<<-fun_mysqlload_query(local_defin_yun,"SELECT * FROM config_reg_series_rule;")
+che300<<-fun_mysqlload_query(local_defin_yun,"SELECT * FROM analysis_che300_cofig_info;")
 id_z<<-che300 %>% dplyr::select(id_che300=car_id)
-dbDisconnect(loc_channel)
 
 #input_tablename<-'config_autoowner_major_info_tmp'
 #input_name<-'autoowner'
@@ -30,15 +27,12 @@ fun_plat_vdatabase<-function(input_tablename,input_name){
   input_idname<-paste0('id_',input_name)
   input_matchname<-paste0('match_type_',input_name)
   input_onlyname<-paste0('is_only_',input_name)
-  loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  yck_czb<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT model_id car_id,brand_name,series_name,model_name model_name_t,model_price,model_year,
-                             liter,auto car_auto,discharge_standard,series_id FROM ",input_tablename," a;")),-1)
-  id_benchmark<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT id_che300,",input_idname,',',input_matchname,',',input_onlyname," FROM config_plat_id_match WHERE ",input_matchname," NOT IN(0,4);")),-1)
-  match_seriesid<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT DISTINCT a.series_id,c.brand_name temp_brand,c.series_name temp_series FROM ",input_tablename," a
- INNER JOIN config_plat_id_match b ON a.model_id=b.",input_idname,"
- INNER JOIN config_vdatabase_yck_major_info c ON b.id_che300=c.model_id GROUP BY series_id;")),-1)
-  dbDisconnect(loc_channel)
+  yck_czb<-fun_mysqlload_query(local_defin_yun,paste0("SELECT model_id car_id,brand_name,series_name,model_name model_name_t,model_price,model_year,
+                             liter,auto car_auto,discharge_standard,series_id FROM ",input_tablename," a;"))
+  id_benchmark<-fun_mysqlload_query(local_defin_yun,paste0("SELECT id_che300,",input_idname,',',input_matchname,',',input_onlyname," FROM config_plat_id_match WHERE ",input_matchname," NOT IN(0,4);"))
+  match_seriesid<-fun_mysqlload_query(local_defin_yun,paste0("SELECT DISTINCT a.series_id,c.brand_name temp_brand,c.series_name temp_series FROM ",input_tablename," a
+                                INNER JOIN config_plat_id_match b ON a.model_id=b.",input_idname,"
+                                INNER JOIN config_vdatabase_yck_major_info c ON b.id_che300=c.model_id GROUP BY series_id;"))
   id<-data.frame(car_id=setdiff(yck_czb$car_id,id_benchmark[,input_idname]))
   yck_czb<-inner_join(yck_czb,id,by="car_id")
   id<-data.frame(car_id=setdiff(che300$car_id,id_benchmark$id_che300))
@@ -133,11 +127,7 @@ if(weekdays(Sys.Date())=='星期四'){
     if(tryCatch({fun_plat_vdatabase(as.character(input_df[i,1]),as.character(input_df[i,2]))},error=function(e){0},finally={0})!=1){
       fun_mailsend("车型库匹配异常config_platid",paste0(as.character(input_df[i,1]),'车型库匹配失败'))}
   }
-  
-  loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  id_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM analysis_che300_cofig_info;"),-1)%>%dplyr::select(id_che300=car_id)
-  dbDisconnect(loc_channel)
+  id_che300<-fun_mysqlload_query(local_defin_yun,"SELECT * FROM analysis_che300_cofig_info;") %>%dplyr::select(id_che300=car_id)
   id_autohome<-read.csv(paste0(local_file,"/file/out_id_autohome.csv"))
   id_souhu<-read.csv(paste0(local_file,"/file/out_id_souhu.csv"))
   id_yiche<-read.csv(paste0(local_file,"/file/out_id_yiche.csv"))

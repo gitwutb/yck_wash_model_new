@@ -201,7 +201,9 @@ fun_stopWords<-function(data_input){
   qx_name[grep("奔驰",car_series1)]<-gsub("AMG","",qx_name[grep("奔驰",car_series1)])
   benchi<-str_extract(car_series1,"荣威.*|福特(E|F).*|捷豹.*|奥迪TTS|奥迪TT|奥迪A[1-9]L|奥迪A[1-9]|奥迪S[1-9]|奔驰.*")
   benchi<-gsub("荣威|福特E|福特|捷豹|奥迪|奔驰|(级| |-).*","",benchi)
+  benchi[is.na(benchi)]<-""
   benchi[-grep("",benchi)]<-""
+  
   #清除e L等
   forFun<-function(i){
     sub(benchi[i],"",qx_name[i])
@@ -618,8 +620,9 @@ fun_normalization<-function(input_test) {
   input_test<-gsub("V3菱悦|菱悦","V3菱悦",input_test)
   input_test<-gsub("YARISL致炫|致炫","YARISL致炫",input_test)
   input_test<-gsub("YARISL致享|致享","YARISL致享",input_test)
-  input_test<-gsub("PASSAT","帕萨特",input_test)
-  input_test<-gsub("帕萨特领驭|领驭","帕萨特领驭",input_test)
+  input_test<-gsub("大众帕萨特混合动力|帕萨特插电混动","帕萨特新能源",input_test)
+  input_test<-gsub("PASSAT领驭|领驭","帕萨特领驭",input_test)
+  input_test<-gsub("PASSAT|大众帕萨特","帕萨特",input_test)
   input_test<-gsub("III","Ⅲ",input_test)
   input_test<-gsub("SPRINTER","斯宾特",input_test)
   input_test<-gsub("吉利SC3","英伦SC3",input_test)
@@ -645,6 +648,7 @@ fun_normalization<-function(input_test) {
   input_test<-gsub("YETI","野帝",input_test)
   input_test<-gsub("Scirocco尚酷|Scirocco","尚酷",input_test)
   input_test<-gsub("全新胜达|新胜达","胜达",input_test)
+  input_test<-gsub("新明仕","明仕",input_test)
   input_test<-gsub("金龙凯歌|凯歌","金龙凯歌",input_test)
   input_test<-gsub("林肯CONTINENTAL|CONTINENTAL","林肯大陆",input_test)
   input_test<-gsub("Axela昂克赛拉|Axela","昂克赛拉",input_test)

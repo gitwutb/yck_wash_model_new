@@ -77,14 +77,11 @@ washfun_UserCar_deal<-function(input_widetab){
 
 ##第二类：独有治理函数
 fun_step2_che168<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
-                                                     " n.state,n.trans_fee,n.transfer,n.annual,n.insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
-                                                     " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='che168' AND match_des='right') m",
-                                                     " INNER JOIN spider_www_168 n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
+                                                         " n.state,n.trans_fee,n.transfer,n.annual,n.insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
+                                                         " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='che168' AND match_des='right') m",
+                                                         " INNER JOIN spider_www_168 n ON m.id_data_input=n.id",
+                                                         " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   ######
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
@@ -113,18 +110,16 @@ fun_step2_che168<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_che58<-function(){
   che58_city<- read.csv(paste0(local_file,"/config/config_file/城市牌照.csv",sep=""),header = T,sep = ",")
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.url location,n.regDate,n.quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.url location,n.regDate,n.quotes,p.model_price,n.mile,",
                                                      " '' state,n.trans_fee,'' transfer,n.annual,n.high_insure insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
                                                      " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='che58' AND match_des='right') m",
                                                      " INNER JOIN spider_www_58 n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   ######
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
@@ -167,17 +162,15 @@ fun_step2_che58<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-city)
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_csp<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
                                                      " n.state,'0' trans_fee,n.transfer,n.annual,n.high_insure insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time,n.address",
                                                      " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='csp' AND match_des='right') m",
                                                      " INNER JOIN spider_www_chesupai n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   ######
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
@@ -215,17 +208,15 @@ fun_step2_csp<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_czb<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.bid_price quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.bid_price quotes,p.model_price,n.mile,",
                                                      " '' state,'' trans_fee,n.transfer,n.annual,'' insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
                                                      " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='czb' AND match_des='right') m",
                                                      " INNER JOIN spider_www_chezhibao n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
   input_orig$quotes<-round(input_orig$quotes/10000,2)
@@ -266,6 +257,7 @@ fun_step2_czb<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_guazi<-function(){
@@ -331,17 +323,15 @@ fun_step2_guazi<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_rrc<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
                                                      " n.state,'1' trans_fee,n.transfer,n.annual,n.high_insure insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time,n.address",
                                                      " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='rrc' AND match_des='right') m",
                                                      " INNER JOIN spider_www_renren n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
   input_orig$quotes<-round(input_orig$quotes/10000,2)
@@ -374,17 +364,15 @@ fun_step2_rrc<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-address)
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_yiche<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,n.location,n.regDate,n.quotes,p.model_price,n.mile,",
                                                      " '' state,n.trans_fee,'' transfer,n.annual,insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
                                                      " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='yiche' AND match_des='right') m",
                                                      " INNER JOIN spider_www_yiche n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
   input_orig$quotes<-round(input_orig$quotes/10000,2)
@@ -429,18 +417,15 @@ fun_step2_yiche<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 fun_step2_youxin<-function(){
-  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  input_orig<-dbFetch(dbSendQuery(loc_channel,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.address location,n.regDate,n.quotes,p.model_price,n.mile,",
+  input_orig<-fun_mysqlload_query(local_defin,paste0("SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.address location,n.regDate,n.quotes,p.model_price,n.mile,",
                                                      " n.state,'1' trans_fee,'' transfer,n.annual,n.insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time",
-                                                     " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='youxin' AND match_des='right' AND date_add='",data_new,"') m",
+                                                     " FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='youxin' AND match_des='right') m",
                                                      " INNER JOIN spider_www_xin n ON m.id_data_input=n.id",
-                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;")),-1)
-  dbDisconnect(loc_channel)
-  ######
+                                                     " INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id;"))
   input_orig$add_time<-as.Date(input_orig$add_time)
   input_orig$mile<-round(input_orig$mile/10000,2)
   input_orig$quotes<-round(input_orig$quotes/10000,2)
@@ -475,6 +460,59 @@ fun_step2_youxin<-function(){
   input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
   wutb<-input_orig %>% dplyr::select(-regional)
   wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
+  fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
+}
+fun_step2_c273<-function(){
+  input_orig<-fun_mysqlload_query(local_defin,"SELECT m.car_platform,m.id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,
+  p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.area location,n.regDate,n.quotes,
+  p.model_price,n.mile,'' state,'1' trans_fee,'' transfer,n.annual,'' insure,DATE_FORMAT(n.add_time,'%Y-%m-%d') add_time,DATE_FORMAT(n.add_time,'%Y-%m-%d') update_time 
+  FROM (SELECT car_platform,id_data_input,id_che300 FROM analysis_match_id_temp where car_platform='c273' AND match_des='right') m 
+  INNER JOIN spider_www_273 n ON m.id_data_input=n.id INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id")
+  ######
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  
+  location_ls<-str_extract(input_orig$location,paste0(config_distr$city,sep="",collapse = "|"))
+  location_ls1<-data.frame(key_county=str_extract(input_orig$location[which(is.na(location_ls))],paste0(config_distr_all$key_county,sep="",collapse = "|")))
+  location_ls1$key_county<-as.character(location_ls1$key_county)
+  location_ls[which(is.na(location_ls))]<-as.character(inner_join(config_distr_all,location_ls1,by="key_county")$city)
+  input_orig$location<-location_ls
+  input_orig<-inner_join(input_orig,config_distr,c("location"="city"))
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  ##年检
+  input_orig$annual[grep("年[1-9]月",input_orig$annual)]<-gsub("年","年0",input_orig$annual[grep("年[1-9]月",input_orig$annual)])
+  input_orig$annual<-gsub("车主未填写|年","",input_orig$annual)
+  input_orig$annual<-gsub("月","01",input_orig$annual)
+  input_orig$annual<-gsub("过保","19800101",input_orig$annual)
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual,format = "%Y%m%d")
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure[grep("年[1-9]月",input_orig$insure)]<-gsub("年","年0",input_orig$insure[grep("年[1-9]月",input_orig$insure)])
+  input_orig$insure<-gsub("车主未填写|年","",input_orig$insure)
+  input_orig$insure<-gsub("月","01",input_orig$insure)
+  input_orig$insure<-gsub("过保","19800101",input_orig$insure)
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure,format = "%Y%m%d")
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
   fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }
 ##二手车价格平台处理函数
@@ -818,4 +856,340 @@ washfun_souche<-function(){
       fun_step2()
     }
   }
+}
+washfun_c273<-function(){
+  #步骤一：拿取二手车信息
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  deal_data_input<-dbFetch(dbSendQuery(loc_channel,"SELECT id car_id,brand brand_name,series series_name,model model_name_t,ROUND(factory_msrp/10000,2) model_price,factory_year model_year,
+                              displacement liter,gearbox car_auto,emission discharge_standard FROM spider_www_273 a 
+                                WHERE a.id>(SELECT max_id FROM analysis_match_idmax_temp WHERE car_platform in ('c273'))"),-1)
+  dbDisconnect(loc_channel)
+  washfun_UserCar_standard(deal_data_input,'c273')
+  return(1)
+}
+
+
+##方案二：定时（长时间三个月一次）非处理函数-直接调用补充
+fun_step2_che300_matche<-function(){
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT 'che300' car_platform,n.id id_data_input,p.model_id id_che300,p.model_year,p.yck_brandid,
+        p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,
+        p.car_level,n.address location,n.redDate regDate,n.valuation_300 quotes,p.model_price,n.mile,'' state,'1' trans_fee,'' transfer,
+        n.annual,'' insure,DATE_FORMAT(n.add_time,'%Y-%m-%d') add_time,DATE_FORMAT(n.add_time,'%Y-%m-%d') update_time 
+        FROM spider_www_che300 n
+        INNER JOIN config_vdatabase_yck_major_info p ON n.model_id=p.model_id limit 10000"),-1)
+  dbDisconnect(loc_channel)
+
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  
+  location_ls<-str_extract(input_orig$location,paste0(config_distr$city,sep="",collapse = "|"))
+  location_ls1<-data.frame(key_county=str_extract(input_orig$location[which(is.na(location_ls))],paste0(config_distr_all$key_county,sep="",collapse = "|")))
+  location_ls1$key_county<-as.character(location_ls1$key_county)
+  location_ls[which(is.na(location_ls))]<-as.character(inner_join(config_distr_all,location_ls1,by="key_county")$city)
+  input_orig$location<-location_ls
+  input_orig<-inner_join(input_orig,config_distr,c("location"="city"))
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual[grep("年[1-9]月",input_orig$annual)]<-gsub("年","年0",input_orig$annual[grep("年[1-9]月",input_orig$annual)])
+  input_orig$annual<-gsub("车主未填写|年","",input_orig$annual)
+  input_orig$annual<-gsub("月","01",input_orig$annual)
+  input_orig$annual<-gsub("过保","19800101",input_orig$annual)
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual,format = "%Y%m%d")
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure[grep("年[1-9]月",input_orig$insure)]<-gsub("年","年0",input_orig$insure[grep("年[1-9]月",input_orig$insure)])
+  input_orig$insure<-gsub("车主未填写|年","",input_orig$insure)
+  input_orig$insure<-gsub("月","01",input_orig$insure)
+  input_orig$insure<-gsub("过保","19800101",input_orig$insure)
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure,format = "%Y%m%d")
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  fun_mysqlload_add_upd(local_file,local_defin_yun,wutb,'analysis_wide_table')
+}
+fun_step2_che168_match<-function(){
+  #che168自2019-06-11 14:44:46开始添加model_id
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT m.car_platform,n.id id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,
+         p.is_import,p.is_green,p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,
+         n.location,n.regDate,n.quotes,p.model_price,n.mile, n.state,n.trans_fee,n.transfer,n.annual,n.insure,
+         DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time 
+          FROM (SELECT 'che168' car_platform,id_autohome id_data_input,id_che300 FROM config_plat_id_match WHERE id_autohome!=0 GROUP BY car_platform,id_autohome) m 
+            INNER JOIN (SELECT * FROM spider_www_168 WHERE model_id IS NOT NULL) n ON m.id_data_input=n.model_id 
+            INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id"),-1)
+  dbDisconnect(loc_channel)
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  input_orig<-inner_join(input_orig,config_distr,c("location"="city"))
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual)
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure)
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
+  fun_mysqlload_add_upd(local_file,local_defin_yun,wutb,'analysis_wide_table')
+}
+fun_step2_czb_match<-function(){
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT m.car_platform,n.id id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,
+                  p.is_green,p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,
+                  n.location,n.regDate,n.bid_price quotes,p.model_price,n.mile, '' state,'' trans_fee,n.transfer,n.annual,'' insure,
+                  DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time 
+                    FROM (SELECT 'czb' car_platform,id_czb id_data_input,id_che300 FROM config_plat_id_match WHERE id_czb!=0 GROUP BY car_platform,id_czb) m 
+                    INNER JOIN spider_www_chezhibao n ON m.id_data_input=n.model_id 
+                    INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id"),-1)
+  dbDisconnect(loc_channel)
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  
+  #######location清洗&nbsp
+  input_orig$location<-gsub("襄樊","襄阳",input_orig$location)
+  input_orig$location<-gsub("杨凌|杨陵","咸阳",input_orig$location)
+  input_orig$location<-gsub("农垦系统","哈尔滨",input_orig$location)
+  input_orig$location<-gsub("湖北","武汉",input_orig$location)
+  location_ls<-str_extract(input_orig$location,paste0(config_distr$city,sep="",collapse = "|"))
+  #通过区县
+  location_ls1<-data.frame(key_county=str_extract(input_orig$location[which(is.na(location_ls))],paste0(config_distr_all$key_county,sep="",collapse = "|")))
+  location_ls1$key_county<-as.character(location_ls1$key_county)
+  location_ls[which(is.na(location_ls))]<-as.character(right_join(config_distr_all,location_ls1,by="key_county")$city)
+  #最终
+  input_orig$location<-location_ls
+  input_orig<-inner_join(input_orig,config_distr,c("location"="city"))
+  ##########
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual)
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险(无)
+  ##转手(大于等于1次)
+  input_orig$transfer<-gsub("无","0",input_orig$transfer)
+  input_orig$transfer<-gsub(".*-.*","1",input_orig$transfer)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
+  fun_mysqlload_add_upd(local_file,local_defin_yun,wutb,'analysis_wide_table')
+}
+fun_step2_che58_match<-function(){
+  che58_city<- read.csv(paste0(local_file,"/config/config_file/城市牌照.csv",sep=""),header = T,sep = ",")
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT m.car_platform,n.id id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,
+					p.brand_name brand,p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,
+					n.url location,n.regDate,n.quotes,p.model_price,n.mile, '' state,n.trans_fee,'' transfer,n.annual,n.high_insure insure,
+						DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time 
+						FROM (SELECT 'che58' car_platform,id_che58 id_data_input,id_che300 FROM config_plat_id_match WHERE id_che58!=0 GROUP BY car_platform,id_che58) m 
+						INNER JOIN spider_www_58 n ON m.id_data_input=n.model_id 
+            INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id"),-1)
+  dbDisconnect(loc_channel)
+
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  #######location清洗&nbsp
+  che58_city$che58_name<-as.character(che58_city$che58_name)
+  input_orig$location<-gsub("http://qh.58.*","琼海",input_orig$location)
+  input_orig$location<-gsub("http://|.58.com.*","",input_orig$location)
+  input_orig<-inner_join(input_orig,che58_city,c("location"="che58_name"))
+  input_orig$location<-input_orig$city
+  
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual[grep("年[1-9]月",input_orig$annual)]<-gsub("年","年0",input_orig$annual[grep("年[1-9]月",input_orig$annual)])
+  input_orig$annual<-gsub("车主未填写|年","",input_orig$annual)
+  input_orig$annual<-gsub("月","01",input_orig$annual)
+  input_orig$annual<-gsub("过保","19800101",input_orig$annual)
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual,format = "%Y%m%d")
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure[grep("年[1-9]月",input_orig$insure)]<-gsub("年","年0",input_orig$insure[grep("年[1-9]月",input_orig$insure)])
+  input_orig$insure<-gsub("车主未填写|年","",input_orig$insure)
+  input_orig$insure<-gsub("月","01",input_orig$insure)
+  input_orig$insure<-gsub("过保","19800101",input_orig$insure)
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure,format = "%Y%m%d")
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))%>%dplyr::select(-city)
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
+  fun_mysqlload_add_upd(local_file,local_defin_yun,wutb,'analysis_wide_table')
+}
+fun_step2_yiche_match<-function(){
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT m.car_platform,n.id id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,
+        p.brand_name brand,p.series_name series,p.model_name,'' color,p.liter,p.auto,p.discharge_standard,p.car_level,
+        n.location,n.regDate,n.quotes,p.model_price,n.mile, '' state,n.trans_fee,'' transfer,n.annual,insure,
+        DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time 
+        FROM (SELECT 'yiche' car_platform,id_yiche id_data_input,id_che300 FROM config_plat_id_match WHERE id_yiche!=0 GROUP BY car_platform,id_yiche) m 
+          INNER JOIN (SELECT * FROM spider_www_yiche WHERE model_id IS NOT NULL) n ON m.id_data_input=n.model_id 
+          INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id"),-1)
+  dbDisconnect(loc_channel)
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  #######location清洗&nbsp
+  input_orig$location<-gsub("巢湖","合肥",input_orig$location)
+  location_ls<-str_extract(input_orig$location,paste0(config_distr$city,sep="",collapse = "|"))
+  location_ls[which(is.na(location_ls))]<-str_extract(input_orig$location[which(is.na(location_ls))],paste0(unique(config_distr$province),sep="",collapse = "|"))
+  location_ls<-data.frame(city=location_ls)
+  location_ls<-left_join(location_ls,config_distr,c("city"="city"))
+  location_ls$province[which(is.na(location_ls$province))]<-location_ls$city[which(is.na(location_ls$province))]
+  location_ls$regional[which(is.na(location_ls$regional))]<-
+    as.character(left_join(location_ls[which(is.na(location_ls$regional)),],unique(config_distr[,1:2]),by="province")$regional.y)
+  input_orig$location<-location_ls$city
+  input_orig<-data.frame(input_orig,regional=location_ls$regional,province=location_ls$province)
+  if(length(which(is.na(location_ls$regional)))>0){input_orig<-input_orig[-which(is.na(location_ls$regional)),]}
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual<-gsub("车主未填写|年|- -","",input_orig$annual)
+  input_orig$annual<-gsub("月","01",input_orig$annual)
+  input_orig$annual<-gsub("过保|已过期|已到期","19800101",input_orig$annual)
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual,format = "%Y%m%d")
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure<-gsub("车主未填写|年|- -","",input_orig$insure)
+  input_orig$insure<-gsub("月","01",input_orig$insure)
+  input_orig$insure<-gsub("过保|已过期|已到期","19800101",input_orig$insure)
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure,format = "%Y%m%d")
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  #fun_mysqlload_add_upd(local_file,local_defin_yun,wutb,'analysis_wide_table')
+  nrw<-nrow(wutb)%/%300000
+  for (i in 1:nrw) {
+    temp_wutb<-wutb[(300000*(i-1)+1):(300000*i),]
+    temp_wutb$add_time<-as.character(temp_wutb$add_time)
+    fun_mysqlload_add_upd(local_file,local_defin_yun,temp_wutb,'analysis_wide_table')
+    print(i)
+  }
+  temp_wutb<-wutb[(300000*(nrw-1)+1):nrow(wutb),]
+  temp_wutb$add_time<-as.character(temp_wutb$add_time)
+  fun_mysqlload_add_upd(local_file,local_defin_yun,temp_wutb,'analysis_wide_table')
+}
+fun_step2_youxin_match<-function(){
+  loc_channel<-dbConnect(MySQL(),user = local_defin$user,host=local_defin$host,password= local_defin$password,dbname=local_defin$dbname)
+  dbSendQuery(loc_channel,'SET NAMES gbk')
+  input_orig<-dbFetch(dbSendQuery(loc_channel,"SELECT m.car_platform,n.id id_data_input,m.id_che300,p.model_year,p.yck_brandid,p.yck_seriesid,p.is_import,p.is_green,p.brand_name brand,
+              p.series_name series,p.model_name,n.color,p.liter,p.auto,p.discharge_standard,p.car_level,n.address location,n.regDate,n.quotes,
+              p.model_price,n.mile, n.state,'1' trans_fee,'' transfer,n.annual,n.insure,DATE_FORMAT(n.add_time,'%Y-%m-%d')  add_time,
+                DATE_FORMAT(n.update_time,'%Y-%m-%d') update_time 
+                FROM (SELECT 'youxin' car_platform,id_youxin id_data_input,id_che300 FROM config_plat_id_match WHERE id_youxin!=0 GROUP BY car_platform,id_youxin) m 
+                INNER JOIN spider_www_xin n ON m.id_data_input=n.model_id 
+                INNER JOIN config_vdatabase_yck_major_info p ON m.id_che300=p.model_id"),-1)
+  dbDisconnect(loc_channel)
+  input_orig$add_time<-as.Date(input_orig$add_time)
+  input_orig$mile<-round(input_orig$mile/10000,2)
+  input_orig$quotes<-round(input_orig$quotes/10000,2)
+  ###location清洗
+  location_ls<-str_extract(input_orig$location,paste0(config_distr$city,sep="",collapse = "|"))
+  location_ls1<-data.frame(key_county=str_extract(input_orig$location[which(is.na(location_ls))],paste0(config_distr_all$key_county,sep="",collapse = "|")))
+  location_ls1$key_county<-as.character(location_ls1$key_county)
+  location_ls[which(is.na(location_ls))]<-as.character(inner_join(config_distr_all,location_ls1,by="key_county")$city)
+  input_orig$location<-location_ls
+  input_orig<-inner_join(input_orig,config_distr,c("location"="city"))
+  #
+  input_orig<-inner_join(input_orig,config_series_bcountry,by='yck_brandid')
+  user_years<-round((as.Date(input_orig$add_time)-as.Date(input_orig$regDate))/365,2)
+  input_orig<-data.frame(input_orig,user_years)
+  if(nrow(input_orig)==0){
+    print("无数据")
+  }else{
+    input_orig$regDate<-cut(as.Date(input_orig$regDate),breaks="month")
+  }
+  input_orig$user_years<-as.numeric(as.character(input_orig$user_years))
+  ##年检
+  input_orig$annual<-as.Date(input_orig$add_time)-as.Date(input_orig$annual)
+  input_orig$annual[which(input_orig$annual>0)]<-1
+  input_orig$annual[which(input_orig$annual<=0)]<-0
+  input_orig$annual<-as.character(input_orig$annual)
+  ##保险
+  input_orig$insure<-as.Date(input_orig$add_time)-as.Date(input_orig$insure)
+  input_orig$insure[which(input_orig$insure>0)]<-1
+  input_orig$insure[which(input_orig$insure<=0)]<-0
+  input_orig$insure<-as.character(input_orig$insure)
+  ##分区字段(放最后)
+  input_orig<-data.frame(input_orig,partition_month=format(input_orig$add_time,"%Y%m"))
+  wutb<-input_orig %>% dplyr::select(-regional)
+  wutb<-washfun_UserCar_deal(wutb)
+  wutb$add_time<-as.character(wutb$add_time)
+  fun_mysqlload_add(local_file,local_defin_yun,wutb,'analysis_wide_table')
 }

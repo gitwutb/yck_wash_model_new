@@ -8,6 +8,7 @@ library(raster)
 #读取数据
 library(RMySQL)
 local_file<-gsub("\\/bat|\\/main.*","",tryCatch(dirname(rstudioapi::getActiveDocumentContext()$path),error=function(e){getwd()}))
+#local_file<-'//User-20170720ma/yck_wash_model_new'
 source(paste0(local_file,"/config/config_fun/yck_base_function.R"),echo=FALSE,encoding="utf-8")
 local_defin_yun<-fun_mysql_config_up()$local_defin_yun
 
@@ -21,8 +22,7 @@ rm_series_rule<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM config_reg_series
 che300<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM analysis_che300_cofig_info;"),-1)
 config_series_levels<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT brand_name brand_c300,series_name series_c300,series_id series_id_c300 FROM config_vdatabase_yck_major_info;"),-1)
 dbDisconnect(loc_channel)
-source(paste0(local_file,"\\config\\config_fun\\fun_stopWords.R",sep=""),echo=TRUE,encoding="utf-8")
-source(paste0(local_file,"\\config\\config_fun\\fun_normalization.R",sep=""),echo=TRUE,encoding="utf-8")
+source(paste0(local_file,"\\config\\config_fun\\dealFun_vdatabase.R",sep=""),echo=TRUE,encoding="utf-8")
 
 
 ######################------第一部分：得到车的品牌及车系-------#################

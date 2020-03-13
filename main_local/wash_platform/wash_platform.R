@@ -17,16 +17,14 @@ source(paste0(local_file,"/main_local/wash_platform/washfun_platform.R"),echo=FA
 rm_che58<<- read.csv(paste0(local_file,"/config/config_file/reg_che58.csv",sep=""),header = T,sep = ",")
 rm_rule<<- read.csv(paste0(local_file,"/config/config_file/reg_rule.csv"),header = T,sep = ",")
 #out_rrc<<- read.csv(paste0(local_file,"/config/config_file/out_rrc.csv"),header = T,sep = ",")
-loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-dbSendQuery(loc_channel,'SET NAMES gbk')
-rm_series_rule<<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM config_reg_series_rule;"),-1)
-che300<<-dbFetch(dbSendQuery(loc_channel,"SELECT * FROM analysis_che300_cofig_info;"),-1)
-config_distr<<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT regional,b.province,a.key_municipal city FROM config_district a
-                                  INNER JOIN config_district_regional b ON a.key_province=b.province;"),-1)
-config_distr_all<<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT regional,b.province,a.key_municipal city,a.key_county FROM config_district a
-                                  INNER JOIN config_district_regional b ON a.key_province=b.province;"),-1)
-config_series_bcountry<<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT yck_brandid,car_country FROM config_vdatabase_yck_brand"),-1)
-dbDisconnect(loc_channel)
+rm_series_rule<<-fun_mysqlload_query(local_defin_yun,"SELECT * FROM config_reg_series_rule;")
+che300<<-fun_mysqlload_query(local_defin_yun,"SELECT * FROM analysis_che300_cofig_info;")
+config_distr<<-fun_mysqlload_query(local_defin_yun,"SELECT DISTINCT regional,b.province,a.key_municipal city FROM config_district a
+                                  INNER JOIN config_district_regional b ON a.key_province=b.province;")
+config_distr_all<<-fun_mysqlload_query(local_defin_yun,"SELECT DISTINCT regional,b.province,a.key_municipal city,a.key_county FROM config_district a
+                                  INNER JOIN config_district_regional b ON a.key_province=b.province;")
+config_series_bcountry<<-fun_mysqlload_query(local_defin_yun,"SELECT DISTINCT yck_brandid,car_country FROM config_vdatabase_yck_brand")
+
 
 #执行函数，异常邮件抛出#(每三天执行一次)
 if(as.integer(format(Sys.Date(),"%d"))%%3==0){
@@ -34,5 +32,8 @@ if(as.integer(format(Sys.Date(),"%d"))%%3==0){
   for (i in 1:length(input_v)) {
     return_res<-tryCatch({eval(parse(text = paste0(input_v[i],"()")))},error=function(e){0},finally={0})
     if(return_res!=1){fun_mailsend("二手车价格平台清洗异常",paste0(input_v[i],'平台清洗失败'))}
+    fun_mysqlload_query(local_defin_yun,"REPLACE INTO analysis_wide_table_cous
+            SELECT yck_seriesid,COUNT(*) count_s FROM analysis_wide_table GROUP BY yck_seriesid")
+    
   }
 }

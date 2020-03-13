@@ -19,40 +19,34 @@ source(paste0(local_file,"/config/config_fun/dealFun_vdatabase.R"),echo=FALSE,en
 ##车型库ID自增处理
 fun_config_vdatabase_info<-function(){
   ####--车型库构建：品牌ID增加--####
-  loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  brand_add<-dbFetch(dbSendQuery(loc_channel,"SELECT a.Initial,a.brandid,a.brand_name FROM
+  brand_add<-fun_mysqlload_query(local_defin_yun,"SELECT a.Initial,a.brandid,a.brand_name FROM
         (SELECT DISTINCT Initial,brandid,brand_name FROM config_che300_major_info) a 
         LEFT JOIN config_vdatabase_yck_brand b ON a.brandid=b.brandid
-        WHERE yck_brandid IS NULL;"),-1)
-  brand_all<-dbFetch(dbSendQuery(loc_channel,"SELECT a.Initial,a.brandid,a.brand_name,yck_brandid FROM
+        WHERE yck_brandid IS NULL;")
+  brand_all<-fun_mysqlload_query(local_defin_yun,"SELECT a.Initial,a.brandid,a.brand_name,yck_brandid FROM
         (SELECT DISTINCT Initial,brandid,brand_name FROM config_che300_major_info) a 
-        INNER JOIN config_vdatabase_yck_brand b ON a.brandid=b.brandid;"),-1)
-  dbDisconnect(loc_channel)
+        INNER JOIN config_vdatabase_yck_brand b ON a.brandid=b.brandid;")
   if(nrow(brand_add)>0){
     brand_all$yck_brandid<-as.numeric(gsub("[a-zA-Z]","",brand_all$yck_brandid))
-    brand_Initial_max<-brand_all %>% group_by(Initial) %>% summarise(maxb=max(as.integer(yck_brandid))) %>%
+    brand_Initial_max<-brand_all %>% dplyr::group_by(Initial) %>% dplyr::summarise(maxb=max(as.integer(yck_brandid))) %>%
       ungroup() %>% as.data.frame()
     brand_add<-left_join(brand_add,brand_Initial_max,by=c('Initial'))
     brand_add$maxb[is.na(brand_add$maxb)]<-0
-    brand_add<-brand_add %>% group_by(Initial) %>% mutate(yck_brandid=paste0(Initial,maxb+as.integer(factor(brand_name)))) %>%
-      as.data.frame() %>% dplyr::select(brandid,brand_name,yck_brandid) %>% mutate(car_country='无')
+    brand_add<-brand_add %>% dplyr::group_by(Initial) %>% mutate(yck_brandid=paste0(Initial,maxb+as.integer(factor(brand_name)))) %>%
+      as.data.frame() %>% dplyr::select(brandid,Initial,brand_name,yck_brandid) %>% mutate(car_country='无')
     fun_mysqlload_add(local_file,local_defin_yun,brand_add,"config_vdatabase_yck_brand")
   }
   
   ####--车型库构建：车系ID增加--####
-  loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  series_add<-dbFetch(dbSendQuery(loc_channel,"SELECT a.series_id,a.series_group_name,a.series_name,yck_brandid FROM
+  series_add<-fun_mysqlload_query(local_defin_yun,"SELECT a.series_id,a.series_group_name,a.series_name,yck_brandid FROM
         (SELECT DISTINCT brandid,series_id,series_group_name,series_name FROM config_che300_major_info) a 
         LEFT JOIN config_vdatabase_yck_series b ON a.series_id=b.series_id
         INNER JOIN config_vdatabase_yck_brand c ON a.brandid=c.brandid
-        WHERE yck_seriesid IS NULL;"),-1)
-  series_all<-dbFetch(dbSendQuery(loc_channel,"SELECT yck_brandid,yck_seriesid FROM
+        WHERE yck_seriesid IS NULL;")
+  series_all<-fun_mysqlload_query(local_defin_yun,"SELECT yck_brandid,yck_seriesid FROM
         (SELECT DISTINCT brandid,series_id,series_name FROM config_che300_major_info) a 
         INNER JOIN config_vdatabase_yck_series b ON a.series_id=b.series_id
-        INNER JOIN config_vdatabase_yck_brand c ON a.brandid=c.brandid;"),-1)
-  dbDisconnect(loc_channel)
+        INNER JOIN config_vdatabase_yck_brand c ON a.brandid=c.brandid;")
   if(nrow(series_add)>0){
     series_add$series_group_name[grep('进口',series_add$series_name)]<-
       paste0('进口',series_add$series_group_name[grep('进口',series_add$series_name)])
@@ -65,36 +59,33 @@ fun_config_vdatabase_info<-function(){
     is_import[which(is.na(is_import))]<-0
     
     series_all$yck_seriesid<-as.numeric(gsub('.*[a-zA-Z]','',series_all$yck_seriesid))
-    series_all<-series_all%>% group_by(yck_brandid) %>% summarise(maxs=max(yck_seriesid)) %>% as.data.frame()
+    series_all<-series_all%>% dplyr::group_by(yck_brandid) %>% dplyr::summarise(maxs=max(yck_seriesid)) %>% as.data.frame()
     series_add<-left_join(series_add,series_all,by=c('yck_brandid'))
     series_add$maxs[is.na(series_add$maxs)]<-0
     
-    series_add<-series_add %>% group_by(yck_brandid) %>% mutate(yck_seriesid=paste0(yck_brandid,'S',as.integer(maxs)+as.integer(factor(series_name)))) %>%
+    series_add<-series_add %>% dplyr::group_by(yck_brandid) %>% mutate(yck_seriesid=paste0(yck_brandid,'S',as.integer(maxs)+as.integer(factor(series_name)))) %>%
       as.data.frame() %>% dplyr::select(series_id,series_group_name,series_name,yck_seriesid) %>%
       mutate(is_import=is_import) %>% mutate(car_level='无',is_green='无')
     fun_mysqlload_add(local_file,local_defin_yun,series_add,"config_vdatabase_yck_series")
   }
   
   ####--车型库构建：车型ID增加--####
-  loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
-  dbSendQuery(loc_channel,'SET NAMES gbk')
-  model_add<-dbFetch(dbSendQuery(loc_channel,"SELECT a.model_id,a.Initial,a.brandid,d.yck_brandid,a.series_id,c.yck_seriesid FROM config_che300_major_info a 
+  model_add<-fun_mysqlload_query(local_defin_yun,"SELECT a.model_id,a.Initial,a.brandid,d.yck_brandid,a.series_id,c.yck_seriesid FROM config_che300_major_info a 
         LEFT JOIN config_vdatabase_yck_model b ON a.model_id=b.model_id
         LEFT JOIN config_vdatabase_yck_series c ON a.series_id=c.series_id
         LEFT JOIN config_vdatabase_yck_brand d ON a.brandid=d.brandid
-        WHERE yck_modelid IS NULL;"),-1)
-  model_all<-dbFetch(dbSendQuery(loc_channel,"SELECT yck_seriesid,yck_modelid FROM config_vdatabase_yck_model a
+        WHERE yck_modelid IS NULL;")
+  model_all<-fun_mysqlload_query(local_defin_yun,"SELECT yck_seriesid,yck_modelid FROM config_vdatabase_yck_model a
         INNER JOIN config_che300_major_info b ON a.model_id=b.model_id
-        INNER JOIN config_vdatabase_yck_series c ON b.series_id=c.series_id;"),-1)
-  dbDisconnect(loc_channel)
+        INNER JOIN config_vdatabase_yck_series c ON b.series_id=c.series_id;")
   if(nrow(model_add)>0){
     model_all$yck_modelid<-as.numeric(gsub('.*[a-zA-Z]','',model_all$yck_modelid))
-    model_all<-model_all%>% group_by(yck_seriesid) %>% summarise(maxs=max(yck_modelid)) %>% as.data.frame()
+    model_all<-model_all%>% dplyr::group_by(yck_seriesid) %>% dplyr::summarise(maxs=max(yck_modelid)) %>% as.data.frame()
     model_add<-left_join(model_add,model_all,by=c('yck_seriesid'))
     model_add$maxs[is.na(model_add$maxs)]<-0
-    model_add<-model_add %>% group_by(yck_seriesid) %>% mutate(yck_modelid=paste0(yck_seriesid,'M',as.integer(maxs)+as.integer(factor(model_id)))) %>%
+    model_add<-model_add %>% dplyr::group_by(yck_seriesid) %>% mutate(yck_modelid=paste0(yck_seriesid,'M',as.integer(maxs)+as.integer(factor(model_id)))) %>%
       as.data.frame() %>% dplyr::select(yck_modelid,model_id)
-    fun_mysqlload_add_upd(local_file,local_defin_yun,model_add,"config_vdatabase_yck_model")
+    fun_mysqlload_add(local_file,local_defin_yun,model_add,"config_vdatabase_yck_model")
   }
   
   ####--车型库构建：车型库信息更新--####
@@ -124,28 +115,31 @@ fun_analysis_che300_cofig<-function(){
   loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
   dbSendQuery(loc_channel,'SET NAMES gbk')
   data_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT model_id,brand_name,series_group_name,series_name,short_name model_name,
-        model_price,model_year,auto,liter,discharge_standard FROM config_vdatabase_yck_major_info;"),-1)
+        model_price,model_year,auto,liter,discharge_standard FROM config_vdatabase_yck_major_info a
+       LEFT JOIN analysis_che300_cofig_info b ON a.model_id=b.car_id WHERE b.car_id IS NULL;"),-1)
   dbDisconnect(loc_channel)
-  
-  #-----数据转换名称------
-  data_input<-data_che300
-  ##--------------------停用词清洗--------------------
-  output_data<-fun_stopWords(data_input)
-  qx_che300<-data.frame(data_input$model_id,output_data)
-  #清洗多余空格
-  qx_che300<-trim(qx_che300)
-  qx_che300$car_model_name<-gsub(" +"," ",qx_che300$car_model_name)
-  qx_che300<-sapply(qx_che300,as.character) %>% as.data.frame(stringsAsFactors=F)
-  for (i in 1:dim(qx_che300)[2]) {
-    qx_che300[,i][-grep("",qx_che300[,i])]<-""
+  if(nrow(data_che300)>0){
+    #-----数据转换名称------
+    data_input<-data_che300
+    ##--------------------停用词清洗--------------------
+    output_data<-fun_stopWords(data_input)
+    qx_che300<-data.frame(data_input$model_id,output_data)
+    #清洗多余空格
+    qx_che300<-trim(qx_che300)
+    qx_che300$car_model_name<-gsub(" +"," ",qx_che300$car_model_name)
+    qx_che300<-sapply(qx_che300,as.character) %>% as.data.frame(stringsAsFactors=F)
+    for (i in 1:dim(qx_che300)[2]) {
+      qx_che300[,i][-grep("",qx_che300[,i])]<-""
+      qx_che300[,i][is.na(qx_che300[,i])]<-""
+    }
+    fun_mysqlload_add_upd(local_file,local_defin_yun,qx_che300,'analysis_che300_cofig_info')
   }
-  fun_mysqlload_add_upd(local_file,local_defin_yun,qx_che300,'analysis_che300_cofig_info')
 }
 ##附属表
 fun_config_reg_series_rule<-function(){
   loc_channel<-dbConnect(MySQL(),user = local_defin_yun$user,host=local_defin_yun$host,password= local_defin_yun$password,dbname=local_defin_yun$dbname)
   dbSendQuery(loc_channel,'SET NAMES gbk')
-  data_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT car_name,car_series1 FROM analysis_che300_cofig_info;"),-1)
+  data_che300<-dbFetch(dbSendQuery(loc_channel,"SELECT DISTINCT car_name,car_series1 FROM analysis_che300_cofig_info;"),-1)
   dbDisconnect(loc_channel)
   #-----数据转换名称------
   data_input<-data_che300
